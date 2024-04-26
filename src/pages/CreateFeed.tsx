@@ -1,8 +1,10 @@
 import React, { useState } from "react"
 import Sheet from 'react-modal-sheet';
 import { FeedService } from "../services/FeedService.ts";
+import { useNavigate } from "react-router-dom";
 
 const CreateFeed = () => {
+    const navigate = useNavigate();
     const [isOpen, setOpen] = useState(false);
     const [feedName, setFeedName] = useState('');
     
@@ -10,6 +12,8 @@ const CreateFeed = () => {
         try {
           const newFeed: any = await (await FeedService.createFeed(feedName)).json();
           console.log(newFeed)
+          setOpen(false);
+          navigate('/' + newFeed.data.slug);
         } catch (error) {
           console.error("Could not create feed: ", error);
         }
@@ -27,9 +31,9 @@ const CreateFeed = () => {
       const onCancelCreate = (event: any) => {
         setOpen(false);
       }
-      
+
     return (
-        <main className="landing">
+      <main className="landing">
         <button className="button is-success is-medium" onClick={onCreateNew}>New feed</button>
         <Sheet isOpen={isOpen} onClose={() => setOpen(false)}>
           <Sheet.Container className="sheet">

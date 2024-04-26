@@ -1,14 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+
+body {
+  font-family: 'Raleway' !important;
+  background-color: #F2F3F5;
+}
+
 .app {
   width: 100vw;
   height: 100vh;
-
   display: flex;
   justify-content: center;
 }
 
-html {
-  background-color: white;
-}
 
 .landing {
   width: 100vw;
