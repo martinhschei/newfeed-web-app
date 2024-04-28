@@ -9,18 +9,20 @@ const Feed = () => {
     const feedSlug = params.slug
     const [isOpen, setOpen] = useState(false);
     const [feed, setFeed] = useState({} as IFeed)
-    
+    const [postTitle, setPostTitle] = useState('');
+    const [postBody, setPostBody] = useState('');
+
     useEffect(() => {
         if (!feedSlug) return
 
-        const loadSlug = async () => {
-            await getFeed(feedSlug)
+        const loadBySlug = async () => {
+            await bySlug(feedSlug)
         }
 
-        loadSlug()
-    }, [])
+        loadBySlug()
+    }, [feedSlug])
 
-    const getFeed = async (slug: string) => {
+    const bySlug = async (slug: string) => {
         try {
             const feed = await FeedService.getBySlug(slug)
             setFeed(feed.data)
@@ -29,37 +31,76 @@ const Feed = () => {
         }
     }
 
+    const onChangePostTitle = (event: any) => {
+        setPostTitle(event.target.value)
+    }
+
+    const onChangePostBody = (event: any) => {
+        setPostBody(event.target.value)
+    }
+
+    const onCreateNewPost = async () => {
+        setOpen(true)
+    }  
+    
+    const onPublishPost = async () => {
+        console.log("publishing...")
+
+        await FeedService.publishPost(feed.id, {title: postTitle, body: postBody})
+            .then((response) => {
+                setOpen(false)
+                bySlug(feed.slug)
+                setPostTitle('')
+                setPostBody('')
+            })
+    }
+
+    const onCancelPost = async () => {
+        console.log("on cancel...")
+        setOpen(false)
+    }
+
     return (
         <div style={styles.main}>
+            <div className="sheet-wrapper">
+                <Sheet isOpen={isOpen} onClose={() => setOpen(false)} snapPoints={[-50, 0.6, 100, 0]} initialSnap={1} >
+                    <Sheet.Container className="sheet">
+                    <Sheet.Header />
+                        <Sheet.Content>
+                            <div className="create-post-wrapper" style={{display: 'flex', 'justifyContent' : 'center'}}>
+                                <div className="create-post" style={styles.createPost}>
+                                    <div>
+                                        <input className="input is-medium is-rounded mb-2" type="text" value={postTitle} name="feedName" onChange={onChangePostTitle} placeholder="Post title" />
+                                        <textarea className="textarea is-medium is-rounded" value={postBody} name="feedContent" onChange={onChangePostBody} placeholder="Post body" />
+                                    </div>
+                                    <div className="create-feed__options">
+                                        <button className="button is-success is-medium" onClick={onPublishPost}>Publish</button>
+                                        <button className="button is-medium" onClick={onCancelPost}>Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Sheet.Content>
+                    </Sheet.Container>
+                    <Sheet.Backdrop />
+                </Sheet>
+            </div>
+
             <div style={styles.feed}>
                 <div style={styles.feedHeader}>{feed.name}</div>
-                {feed.posts && feed.posts.map((post, index) => (
-                    <div key={index} style={styles.feedPost}>
-                        <h2>{post.title}</h2>
-                        <p>{post.content}</p>
-                    </div>
-                ))}
                 <div style={styles.feedActions}>
-                    <button className="button is-success">New post</button>
+                    <button className="button is-success is-fullwidth" onClick={onCreateNewPost}>New post</button>
+                </div>
+                <div>
+                    {feed.posts && feed.posts.map((post, index) => (
+                        <div style={styles.feedPost}>
+                            <h2 style={styles.postTitle}>{post.title}</h2>
+                            <div key={index}>
+                                {post.body.length > 100 ? post.body.substring(0, 100) + '...' : post.body}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
-            <Sheet isOpen={isOpen} onClose={() => setOpen(false)} snapPoints={[-50, 0.5, 100, 0]} initialSnap={1} >
-            <Sheet.Container className="sheet">
-              <Sheet.Header />
-              <Sheet.Content>
-                <div className="create-feed-wrapper" style={{display: 'flex', 'justifyContent' : 'center'}}>
-                  <div className="create-feed" style={{minWidth: '350px', maxWidth: '650px'}}>
-                    <input className="input is-medium is-rounded" type="text" value={feedName} name="feedName" onChange={onChangeFeedName} placeholder="Feed name" />
-                    <div className="create-feed__options">
-                      <button className="button is-success is-medium" onClick={onSaveNew}>Start</button>
-                      <button className="button is-medium" onClick={onCancelCreate}>Cancel</button>
-                    </div>
-                  </div>
-                </div>
-              </Sheet.Content>
-            </Sheet.Container>
-            <Sheet.Backdrop />
-          </Sheet>
         </div>
     )
 }
@@ -72,29 +113,36 @@ const styles = {
         justifyContent: 'center',
     },
     feed: {
-        width: '700px',
-        height: '89vh',
+        width: '100%',
         marginTop: '10px',
-        display: 'flex',
         justifyContent: 'center',
     },
     feedHeader: {
         color: '#333',
-        fontSize: '24px',
         height: '50px',
+        fontSize: '1.8rem',
+        textAlign: 'center',
+    },
+    postTitle: {
+        fontSize: '1.3rem',
+        fontWeight: 'bold',
+    },
+    feedPost: {
+        color: '#333',
+        padding: '15px',
+        marginBottom: '20px',
+        borderRadius: '10px',
+        backgroundColor: '#f9f9f9',
+        boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px'
+    },
+    createPost: {
+        padding: '10px',
     },
     feedActions: {
         bottom: '10px',
         height: '50px',
         marginTop: '10px',
-        textAlign: 'center',
-        alignItems: 'center',
-        position: 'absolute',
-        justifyContent: 'center',
-    },
-    feedPost: {
-        backgroundColor: '#f9f9f9',
-        boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px'
+        position: 'aboslute',
     },
 }
 
