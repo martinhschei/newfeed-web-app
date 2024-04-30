@@ -113,8 +113,10 @@ const styles = {
         justifyContent: 'center',
     },
     feed: {
-        width: '100%',
+        width: '100vw',
+        height: '100vh',
         marginTop: '10px',
+        padding: '10px',
         justifyContent: 'center',
     },
     feedHeader: {
