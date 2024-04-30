@@ -3,6 +3,7 @@
 html {
   width: 100wv;
   height: 100vh;
+  overflow-y: hidden;
 }
 
 body {
