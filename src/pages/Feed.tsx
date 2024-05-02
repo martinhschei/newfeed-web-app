@@ -1,16 +1,21 @@
-import React, { useEffect, useState } from "react";
 import Sheet from 'react-modal-sheet';
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { IFeed } from "../interface/IFeed.ts";
+import React, { useEffect, useState } from "react";
+import UserService from '../services/UserService.ts';
 import { FeedService } from "../services/FeedService.ts";
 
-const Feed = () => {
+const Feed = ({user}: {user: any}) => {
+    const navigate = useNavigate()
     const params = useParams()
     const feedSlug = params.slug
-    const [isOpen, setOpen] = useState(false);
+    const [postBody, setPostBody] = useState('')
     const [feed, setFeed] = useState({} as IFeed)
-    const [postTitle, setPostTitle] = useState('');
-    const [postBody, setPostBody] = useState('');
+    const [postTitle, setPostTitle] = useState('')
+    const [userName, setUserName] = useState('' as string)
+    const [createdUser, setCreatedUser] = useState({id: ''})
+    const [createPostIsOpen, setCreatePostIsOpen] = useState(false)
+    const [createUserIsOpen, setCreateUserIsOpen] = useState(false)
 
     useEffect(() => {
         if (!feedSlug) return
@@ -22,12 +27,16 @@ const Feed = () => {
         loadBySlug()
     }, [feedSlug])
 
+    useEffect(() => {
+        console.log(userName)
+    }, [userName])
+
     const bySlug = async (slug: string) => {
         try {
             const feed = await FeedService.getBySlug(slug)
             setFeed(feed.data)
         } catch (error) {
-            console.error("Could not get feed: ", error)
+            navigate("/den-feeden-fins-ikke")
         }
     }
 
@@ -39,16 +48,32 @@ const Feed = () => {
         setPostBody(event.target.value)
     }
 
+    const onChangeUserName = (event: any) => {
+        setUserName(event.target.value)
+    }
+
     const onCreateNewPost = async () => {
-        setOpen(true)
+        if (user) {
+            setCreatePostIsOpen(true)
+        }
+
+        if (!user) {
+            console.log("Need to create user.")
+            setCreateUserIsOpen(true)
+        }
     }  
     
     const onPublishPost = async () => {
         console.log("publishing...")
 
-        await FeedService.publishPost(feed.id, {title: postTitle, body: postBody})
-            .then((response) => {
-                setOpen(false)
+        const userId = user ? user.id : createdUser.id
+        if (!userId) {
+            throw Error("No user id found")
+        }
+
+        await FeedService.publishPost(feed.id, {title: postTitle, body: postBody}, userId)
+            .then(() => {
+                setCreatePostIsOpen(false)
                 bySlug(feed.slug)
                 setPostTitle('')
                 setPostBody('')
@@ -57,13 +82,51 @@ const Feed = () => {
 
     const onCancelPost = async () => {
         console.log("on cancel...")
-        setOpen(false)
+        setCreatePostIsOpen(false)
+    }
+
+    const cancelCreateUser = async () => {
+        setCreateUserIsOpen(false)
+        setUserName('')
+    }
+    
+    const onCreateUser = async () => {
+        await UserService.createUser(userName)
+            .then((response) => {
+                setCreateUserIsOpen(false)
+                setCreatePostIsOpen(true)
+                localStorage.setItem('user', JSON.stringify(response))
+                setCreatedUser(response)
+            });
     }
 
     return (
         <div style={styles.main}>
             <div className="sheet-wrapper">
-                <Sheet isOpen={isOpen} onClose={() => setOpen(false)} snapPoints={[-50, 0.6, 100, 0]} initialSnap={1} >
+                <Sheet isOpen={createUserIsOpen} onClose={() => setCreateUserIsOpen(false)} snapPoints={[-50, 0.6, 100, 0]} initialSnap={1} >
+                    <Sheet.Container className="sheet">
+                    <Sheet.Header />
+                        <Sheet.Content>
+                            <div className="sheet-content-wrapper">
+                                <p className="sheet-content">
+                                    For å opprette en post må du har et brukernavn. Brukernavnet kan være akkurat hva du vil.
+                                </p>
+                                <div className="sheet-content">
+                                    <input className="input is-medium is-rounded mb-2" type="text" value={userName} name="userName" onChange={onChangeUserName} placeholder="Brukernavn" />
+                                    <div className="sheet-actions">
+                                        <button className="button is-success is-medium" onClick={onCreateUser}>Ok</button>
+                                        <button className="button is-medium" onClick={cancelCreateUser}>Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Sheet.Content>
+                    </Sheet.Container>
+                    <Sheet.Backdrop />
+                </Sheet>
+            </div>
+
+            <div className="sheet-wrapper">
+                <Sheet isOpen={createPostIsOpen} onClose={() => setCreatePostIsOpen(false)} snapPoints={[-50, 0.6, 100, 0]} initialSnap={1} >
                     <Sheet.Container className="sheet">
                     <Sheet.Header />
                         <Sheet.Content>
@@ -74,7 +137,7 @@ const Feed = () => {
                                         <textarea className="textarea is-medium is-rounded" value={postBody} name="feedContent" onChange={onChangePostBody} placeholder="Post body" />
                                     </div>
                                     <div className="create-feed__options">
-                                        <button className="button is-success is-medium" onClick={onPublishPost}>Publish</button>
+                                        <button className="button is-success is-medium" disabled={postBody.length === 0} onClick={onPublishPost}>Publish</button>
                                         <button className="button is-medium" onClick={onCancelPost}>Cancel</button>
                                     </div>
                                 </div>
@@ -84,23 +147,24 @@ const Feed = () => {
                     <Sheet.Backdrop />
                 </Sheet>
             </div>
-
-            <div style={styles.feed}>
-                <div style={styles.feedHeader}>{feed.name}</div>
-                <div style={styles.feedActions}>
-                    <button className="button is-success is-fullwidth" onClick={onCreateNewPost}>New post</button>
-                </div>
-                <div>
-                    {feed.posts && feed.posts.map((post, index) => (
-                        <div style={styles.feedPost}>
-                            <h2 style={styles.postTitle}>{post.title}</h2>
-                            <div key={index}>
-                                {post.body.length > 100 ? post.body.substring(0, 100) + '...' : post.body}
+            {feed.id && (
+                <div style={styles.feed}>
+                    <div style={styles.feedHeader}>{feed.name}</div>
+                    <div style={styles.feedActions}>
+                        <button className="button is-success is-fullwidth" onClick={onCreateNewPost}>New post</button>
+                    </div>
+                    <div>
+                        {feed.posts && feed.posts.map((post, index) => (
+                            <div style={styles.feedPost}>
+                                <h2 style={styles.postTitle}>{post.title}</h2>
+                                <div key={index}>
+                                    {post.body.length > 100 ? post.body.substring(0, 100) + '...' : post.body}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}  
         </div>
     )
 }
@@ -113,10 +177,10 @@ const styles = {
         justifyContent: 'center',
     },
     feed: {
-        width: '100vw',
         height: '100vh',
         marginTop: '10px',
         padding: '10px',
+        minWidth: '300px',
         justifyContent: 'center',
     },
     feedHeader: {
