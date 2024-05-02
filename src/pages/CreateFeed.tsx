@@ -18,9 +18,8 @@ const CreateFeed = ({user}: {user: any}) => {
         if (!userId) {
             throw Error("No user id found")
         }
-
+        
         const newFeed: any = await (await FeedService.createFeed(feedName, userId)).json();
-        console.log(newFeed)
         setCreateFeedOpen(false);
         navigate('/' + newFeed.data.slug);
       } catch (error) {

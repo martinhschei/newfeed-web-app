@@ -57,7 +57,7 @@ const Feed = ({user}: {user: any}) => {
             setCreatePostIsOpen(true)
         }
 
-        if (!user) {
+        if (! user && ! createdUser.id) {
             console.log("Need to create user.")
             setCreateUserIsOpen(true)
         }
@@ -130,8 +130,8 @@ const Feed = ({user}: {user: any}) => {
                     <Sheet.Container className="sheet">
                     <Sheet.Header />
                         <Sheet.Content>
-                            <div className="create-post-wrapper" style={{display: 'flex', 'justifyContent' : 'center'}}>
-                                <div className="create-post" style={styles.createPost}>
+                            <div className="sheet-content-wrapper">
+                                <div className="sheet-content">
                                     <div>
                                         <input className="input is-medium is-rounded mb-2" type="text" value={postTitle} name="feedName" onChange={onChangePostTitle} placeholder="Post title" />
                                         <textarea className="textarea is-medium is-rounded" value={postBody} name="feedContent" onChange={onChangePostBody} placeholder="Post body" />
@@ -181,6 +181,7 @@ const styles = {
         marginTop: '10px',
         padding: '10px',
         minWidth: '300px',
+        width: '100%',
         justifyContent: 'center',
     },
     feedHeader: {
