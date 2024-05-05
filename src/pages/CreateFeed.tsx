@@ -10,7 +10,6 @@ const CreateFeed = () => {
     const [feedName, setFeedName] = useState('');
     const [userName, setUserName] = useState('');
     const [createFeedOpen, setCreateFeedOpen] = useState(false);
-    const [createdUser, setCreatedUser] = useState({id: ''} as any)
     const [createUserIsOpen, setCreateUserIsOpen] = useState(false);
 
     const onSaveNew = async (event: any) => {
@@ -60,12 +59,11 @@ const CreateFeed = () => {
   
   const onCreateUser = async () => {
     await UserService.createUser(userName)
-        .then((response) => {
-            setCreateUserIsOpen(false)
-            setCreateFeedOpen(true)
-            localStorage.setItem('user', JSON.stringify(response))
-            setCreatedUser(response)
-        });
+      .then((response) => {
+          setCreateUserIsOpen(false)
+          setCreateFeedOpen(true)
+          localStorage.setItem('user', JSON.stringify(response))
+      });
   }
 
     return (
