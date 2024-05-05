@@ -59,13 +59,13 @@ const CreateFeed = () => {
   }
   
   const onCreateUser = async () => {
-      await UserService.createUser(userName)
-          .then((response) => {
-              setCreateUserIsOpen(false)
-              setCreateFeedOpen(true)
-              localStorage.setItem('user', JSON.stringify(response))
-              setCreatedUser(response)
-          });
+    await UserService.createUser(userName)
+        .then((response) => {
+            setCreateUserIsOpen(false)
+            setCreateFeedOpen(true)
+            localStorage.setItem('user', JSON.stringify(response))
+            setCreatedUser(response)
+        });
   }
 
     return (

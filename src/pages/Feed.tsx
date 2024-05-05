@@ -1,10 +1,10 @@
 import Sheet from 'react-modal-sheet';
-import { useNavigate, useParams } from "react-router-dom";
 import { IFeed } from "../interface/IFeed.ts";
+import { IUser } from '../interface/IUser.ts';
 import React, { useEffect, useState } from "react";
 import UserService from '../services/UserService.ts';
 import { FeedService } from "../services/FeedService.ts";
-import { IUser } from '../interface/IUser.ts';
+import { useNavigate, useParams } from "react-router-dom";
 
 const Feed = () => {
     const navigate = useNavigate()
@@ -15,7 +15,6 @@ const Feed = () => {
     const [feed, setFeed] = useState({} as IFeed)
     const [postTitle, setPostTitle] = useState('')
     const [userName, setUserName] = useState('' as string)
-    const [createdUser, setCreatedUser] = useState({id: ''})
     const [createPostIsOpen, setCreatePostIsOpen] = useState(false)
     const [createUserIsOpen, setCreateUserIsOpen] = useState(false)
 
@@ -100,7 +99,6 @@ const Feed = () => {
                 setCreateUserIsOpen(false)
                 setCreatePostIsOpen(true)
                 localStorage.setItem('user', JSON.stringify(response))
-                setCreatedUser(response)
             });
     }
 
