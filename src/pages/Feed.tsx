@@ -128,7 +128,7 @@ const Feed = () => {
     return (
         <div style={styles.main}>
             <div className="sheet-wrapper">
-                <Sheet isOpen={createUserIsOpen} onClose={() => setCreateUserIsOpen(false)} snapPoints={[-50, 0.6, 100, 0]} initialSnap={1} >
+                <Sheet isOpen={createUserIsOpen} onClose={() => setCreateUserIsOpen(false)} snapPoints={[-50, 0.8, 100, 0]} initialSnap={1} >
                     <Sheet.Container className="sheet">
                     <Sheet.Header />
                         <Sheet.Content>
