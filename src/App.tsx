@@ -1,17 +1,34 @@
 import './App.css';
-import React, { useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
-import CreateFeed from './pages/CreateFeed.tsx';
 import Feed from './pages/Feed.tsx';
+import React, { useEffect } from 'react';
+import CreateFeed from './pages/CreateFeed.tsx';
+import { Route, Routes } from 'react-router-dom';
+import NotFound from './pages/NotFound.tsx';
 
 function App() {
+  const [user, setUser] = React.useState(null)
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user')
+    if (!savedUser) {
+      console.log("No user found")
+    }
+    if (savedUser) {
+      setUser(JSON.parse(savedUser))
+    }
+  }, [])
+
+  useEffect(() => {
+    console.log(user)
+  }, [user])
 
   return (
     <div className="app">
-      <Routes>
-        <Route path="/:slug" element={<Feed />} />
-        <Route path="/" element={<CreateFeed />} />
-      </Routes>
+        <Routes>
+          <Route path="/:slug" element={<Feed />} />
+          <Route path="/" element={<CreateFeed />} />
+          <Route path="/den-feeden-fins-ikke" element={<NotFound />} />
+        </Routes>
     </div>
   );
 }

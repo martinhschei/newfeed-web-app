@@ -1,13 +1,20 @@
-.app {
-  width: 100vw;
-  height: 100vh;
-
-  display: flex;
-  justify-content: center;
-}
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
 
 html {
-  background-color: white;
+  width: 100wv;
+  height: 100vh;
+  overflow-y: hidden;
+}
+
+body {
+  font-family: 'Raleway' !important;
+  background-color: #F2F3F5;
+}
+
+.app {
+  width: 100vw;
+  display: flex;
+  justify-content: center;
 }
 
 .landing {
@@ -30,7 +37,27 @@ html {
   justify-content: space-between;
 }
 
-.sheet {
-  max-width: 500px;
+
+.sheet-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+. {
   margin: 0 auto;
+  min-width: 350px;
+  max-width: 650px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.sheet-content {
+  padding: 15px; 
+  color: black;
+  font-size: 1.1rem;
+}
+
+.sheet-actions {
+  display: flex;
+  justify-content: space-between;
 }
