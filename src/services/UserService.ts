@@ -1,5 +1,6 @@
 class UserService {
-    private static baseUrl = "http://127.0.0.1:8000/api"
+    // private static baseUrl = "http://127.0.0.1:8000/api"
+    private static baseUrl = "https://newfeed-api.qoder.no/api"
     
     static async createUser(username: string) {
         const result = await fetch(UserService.baseUrl + '/user', {

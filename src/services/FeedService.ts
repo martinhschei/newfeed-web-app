@@ -2,8 +2,8 @@ import { ICreatePost } from "../interface/ICreatePost";
 
 class FeedService {
     // private static baseUrl = "http://127.0.0.1:8000/api"
-    private static baseUrl = "https://newfeed.qoder.no.api"
-    
+    private static baseUrl = "https://newfeed-api.qoder.no/api"
+
     static async publishPost(feedId: number, post: ICreatePost, userId: number) {
         return await fetch(`${FeedService.baseUrl}/feed/${feedId}/post`, {
             method: 'POST',
