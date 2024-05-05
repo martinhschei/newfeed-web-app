@@ -70,7 +70,7 @@ const CreateFeed = () => {
       <main className="landing">
         <button className="button is-success is-medium" onClick={onCreateNew}>New feed</button>
         <div className="sheet-wrapper">
-          <Sheet isOpen={createFeedOpen} onClose={() => setCreateFeedOpen(false)} snapPoints={[-50, 0.5, 100, 0]} initialSnap={1} >
+          <Sheet isOpen={createFeedOpen} onClose={() => setCreateFeedOpen(false)} snapPoints={[-50, 0.8, 100, 0]} initialSnap={1} >
             <Sheet.Container>
               <Sheet.Header />
               <Sheet.Content>
