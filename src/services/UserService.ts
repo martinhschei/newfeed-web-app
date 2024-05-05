@@ -12,6 +12,16 @@ class UserService {
 
         return await result.json();
     }
-}
+
+    static async storedUser() {
+        const user = localStorage.getItem("user")
+        
+        if (user) {
+            return JSON.parse(user)
+        }
+        
+        return null
+    }
+ }
 
 export default UserService

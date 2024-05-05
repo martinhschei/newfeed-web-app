@@ -4,11 +4,13 @@ import { IFeed } from "../interface/IFeed.ts";
 import React, { useEffect, useState } from "react";
 import UserService from '../services/UserService.ts';
 import { FeedService } from "../services/FeedService.ts";
+import { IUser } from '../interface/IUser.ts';
 
-const Feed = ({user}: {user: any}) => {
+const Feed = () => {
     const navigate = useNavigate()
     const params = useParams()
     const feedSlug = params.slug
+    const [comment, setComment] = useState('')
     const [postBody, setPostBody] = useState('')
     const [feed, setFeed] = useState({} as IFeed)
     const [postTitle, setPostTitle] = useState('')
@@ -53,11 +55,13 @@ const Feed = ({user}: {user: any}) => {
     }
 
     const onCreateNewPost = async () => {
+        const user = await UserService.storedUser() as IUser;
+
         if (user) {
             setCreatePostIsOpen(true)
         }
 
-        if (! user && ! createdUser.id) {
+        if (! user) {
             console.log("Need to create user.")
             setCreateUserIsOpen(true)
         }
@@ -66,12 +70,12 @@ const Feed = ({user}: {user: any}) => {
     const onPublishPost = async () => {
         console.log("publishing...")
 
-        const userId = user ? user.id : createdUser.id
-        if (!userId) {
+        const user = await UserService.storedUser() as IUser;
+        if (!user) {
             throw Error("No user id found")
         }
 
-        await FeedService.publishPost(feed.id, {title: postTitle, body: postBody}, userId)
+        await FeedService.publishPost(feed.id, {title: postTitle, body: postBody}, user.id)
             .then(() => {
                 setCreatePostIsOpen(false)
                 bySlug(feed.slug)
@@ -98,6 +102,29 @@ const Feed = ({user}: {user: any}) => {
                 localStorage.setItem('user', JSON.stringify(response))
                 setCreatedUser(response)
             });
+    }
+
+    const onCommentChange = (event: any) => {
+        setComment(event.target.value)
+    }
+
+    const onComment = async (post: any) => {
+        console.log(post)
+        if (!comment) return
+
+        const user = await UserService.storedUser() as IUser;
+        if (!user) {
+            setCreateUserIsOpen(true)
+        }
+        if (user) {
+            console.log("commenting...", comment)
+            console.log("commenting on post", post)
+            await FeedService.comment(feed.id, post.id, comment, user.id)
+                .then(() => {
+                    bySlug(feed.slug)
+                    setComment('')
+                })
+        }   
     }
 
     return (
@@ -156,9 +183,30 @@ const Feed = ({user}: {user: any}) => {
                     <div>
                         {feed.posts && feed.posts.map((post, index) => (
                             <div style={styles.feedPost}>
-                                <h2 style={styles.postTitle}>{post.title}</h2>
-                                <div key={index}>
+                                <div style={styles.postTitle}>
+                                    <h2 style={styles.postTitleText}>{post.title}</h2>
+                                    <h5 style={styles.author}>av {post.author.name} {post.created_at}</h5>
+                                </div>
+                                <div key={index} style={styles.postBody}>
                                     {post.body.length > 100 ? post.body.substring(0, 100) + '...' : post.body}
+                                </div>
+                                <div style={styles.comments}>
+                                    {post.comments && post.comments.map((comment, index) => (
+                                        <div key={index} style={{ backgroundColor: 'lightgray', padding: '15px', borderRadius: '4px', marginBottom: '5px' }}>
+                                            <p>{comment.body}</p>
+                                            <h5 style={styles.author}>av {post.author.name} {post.created_at}</h5>  
+                                        </div>
+                                    ))}
+
+                                    <textarea rows={3} style={styles.comment} value={comment} onChange={onCommentChange}></textarea>
+                                    <button className="button is-info is-fullwidth" onClick={() => onComment(post)}>
+                                        <span className="icon">
+                                            <i className="fas fa-paper-plane"></i>
+                                        </span>
+                                        <div>
+                                            Comment
+                                        </div>
+                                    </button>
                                 </div>
                             </div>
                         ))}
@@ -176,6 +224,15 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
     },
+    comments: {
+        padding: '5px'
+    },
+    comment: {
+        padding: '15px',
+        width: '100%',
+        borderRadius: '5px',
+        border: '1px solid lightgray',
+    },
     feed: {
         height: '100vh',
         marginTop: '10px',
@@ -184,20 +241,29 @@ const styles = {
         width: '100%',
         justifyContent: 'center',
     },
+    postBody: {
+        padding: '5px',
+    },
+    postTitle: {
+        padding: '5px',
+    },
+    postTitleText: {
+        fontWeight: 600,
+    },
     feedHeader: {
         color: '#333',
         height: '50px',
         fontSize: '1.8rem',
         textAlign: 'center',
     },
-    postTitle: {
-        fontSize: '1.3rem',
-        fontWeight: 'bold',
+    author: {
+        fontSize: '10px',
+        marginBotton: '15px',
     },
     feedPost: {
         color: '#333',
-        padding: '15px',
-        marginBottom: '20px',
+        padding: '5px',
+        marginBottom: '5px',
         borderRadius: '10px',
         backgroundColor: '#f9f9f9',
         boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px'

@@ -3,23 +3,25 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FeedService } from "../services/FeedService.ts";
 import UserService from '../services/UserService.ts';
+import { IUser } from '../interface/IUser.ts';
 
-const CreateFeed = ({user}: {user: any}) => {
+const CreateFeed = () => {
     const navigate = useNavigate();
-    const [createFeedOpen, setCreateFeedOpen] = useState(false);
     const [feedName, setFeedName] = useState('');
     const [userName, setUserName] = useState('');
-    const [createUserIsOpen, setCreateUserIsOpen] = useState(false);
+    const [createFeedOpen, setCreateFeedOpen] = useState(false);
     const [createdUser, setCreatedUser] = useState({id: ''} as any)
-    
+    const [createUserIsOpen, setCreateUserIsOpen] = useState(false);
+
     const onSaveNew = async (event: any) => {
       try {
-        const userId = user ? user.id : createdUser.id
-        if (!userId) {
+        const user = await UserService.storedUser() as IUser;
+
+        if (! user.id) {
             throw Error("No user id found")
         }
-        
-        const newFeed: any = await (await FeedService.createFeed(feedName, userId)).json();
+
+        const newFeed: any = await (await FeedService.createFeed(feedName, user.id)).json();
         setCreateFeedOpen(false);
         navigate('/' + newFeed.data.slug);
       } catch (error) {
@@ -31,13 +33,15 @@ const CreateFeed = ({user}: {user: any}) => {
       console.log(event.target.value);
       setFeedName(event.target.value);
     }
-  
-    const onCreateNew = (event: any) => {
-      if (!user && !createdUser.id  ) {
+    
+    const onCreateNew = async (event: any) => {
+      const user = await UserService.storedUser() as IUser;
+
+      if (!user) {
         setCreateUserIsOpen(true)
         return
       }
-
+      
       setCreateFeedOpen(true);
     }
   

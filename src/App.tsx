@@ -25,8 +25,8 @@ function App() {
   return (
     <div className="app">
         <Routes>
-          <Route path="/:slug" element={<Feed user={user} />} />
-          <Route path="/" element={<CreateFeed user={user} />} />
+          <Route path="/:slug" element={<Feed />} />
+          <Route path="/" element={<CreateFeed />} />
           <Route path="/den-feeden-fins-ikke" element={<NotFound />} />
         </Routes>
     </div>

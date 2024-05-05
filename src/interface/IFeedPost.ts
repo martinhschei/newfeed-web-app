@@ -1,3 +1,5 @@
+import { IPostComment } from "./IPostComment";
+
 export interface IFeedPost {
     id: number;
     author: any;
@@ -6,4 +8,5 @@ export interface IFeedPost {
     feed_id: number;
     created_at: string;
     updated_at: string;
+    comments: IPostComment[]
 }
